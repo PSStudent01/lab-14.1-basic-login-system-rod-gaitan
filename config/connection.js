@@ -1,3 +1,6 @@
+
+// DB Connection:
+
 const mongoose = require('mongoose'); // Imports 'Mongoose', which is the library that lets app talk to MongoDB.
 
 const connectDB = async () => { //Defines an 'async' function called 'connectDB' 
@@ -9,4 +12,4 @@ const connectDB = async () => { //Defines an 'async' function called 'connectDB'
   }
 };
 
-module.exports = connectDB;
+module.exports = connectDB; // this exports the function 'connectDB' so 'server.js' can import and use it.
