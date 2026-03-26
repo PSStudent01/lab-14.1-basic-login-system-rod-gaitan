@@ -2,7 +2,7 @@
 // User Schema:
 
 const mongoose = require('mongoose'); // Imports 'mongoose' for the file to use to create the User schema
-const bcrypt = require('bcrypt');  // Imports bcrypt, which is the library that handles password hashing
+const bcrypt = require('bcrypt');  // Imports bcrypt, which is the library that handles password HASHING
 
 const userSchema = new mongoose.Schema({ // creates a new schema/blueprint for the user that defines the shape of each document in MongoDB.
                                         // document shape for 'user' field. Here, for the 'user' document...  
@@ -33,16 +33,20 @@ userSchema.pre('save', async function(next) { // this registers a pre-save hook,
   if (!this.isModified('password')) return next(); // this checks if the password field was changed. IF it wasn't, THEN it skips the hashing process and moves on. 
                                                 // Therefore, it prevents re-hashing an already hashed password if you update something else on the user object later.
 
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+  const salt = await bcrypt.genSalt(10);  // this generates a salt, which is a random string added to the password before hashing to make it more secure. 
+                                        // 10 is the number of rounds, which controls how complex the salt is.
+                                        // the more round, the more secure at the expense of speed
+  this.password = await bcrypt.hash(this.password, salt); //  this takes the plain text password, combines it with the salt, and hashes it. Then overwrites this.password with the resulting hash so that's what gets saved.
+  next(); // indicates to Mongoose that Tells Mongoose  the pre-save hook process is completed and it's safe to proceed with saving the document.
 });
 
 // Instance method to check password
-userSchema.methods.isCorrectPassword = async function(incomingPassword) {
-  return await bcrypt.compare(incomingPassword, this.password);
+userSchema.methods.isCorrectPassword = async function(incomingPassword) { //Adds a custom method to every user document.                                                                
+  return await bcrypt.compare(incomingPassword, this.password);  // When the method is called, it uses 'bcrypt.compare' to check if the plain text 'incomingPassword' matches the stored hash. 
+                                                                // ...then returns true or false.
 };
 
-const User = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema); // this creates the actual 'User' model from the schema. This MODEL is what it uses to interact with the 'users' collection in MongoDB.
+                                                // mental note: 'User' schema converts into > 'User' model so that we can use this model to talk to > 'users' collection.
 
-module.exports = User;
+module.exports = User; // it exports the 'User' model so other files like the routes can import and use it.
