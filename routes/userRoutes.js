@@ -7,7 +7,7 @@ const router = express.Router(); // this creates a 'router object'
 const jwt = require('jsonwebtoken'); // this thing imports the 'jsonwebtoken' library to create and sign 'JWTs' during login.
 const User = require('../models/User'); // this imports our User model so we can query and create users in the database.
 
-// POST /api/users/register
+// Registration Route - POST /api/users/register
 router.post('/register', async (req, res) => { //Defines a POST route at /register. 
                                                 // Since this router is mounted at '/api/users' in 'server.js', the full path becomes /api/users/register. 
   try { // try to attempt this code, but if somthing goes technically wrong, jump to 'catch' to throw the proper error and don't crash"
@@ -26,17 +26,18 @@ router.post('/register', async (req, res) => { //Defines a POST route at /regist
                                 // this is bc you'd never want to return a password, even a hashed one, in a response.
 
     res.status(201).json(userToReturn);  // this returns a 201 (created) status with the new user's data as JSON.
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (error) {  // IF anything throws an error in the 'try' block, it gets caught here and....
+    res.status(500).json({ message: error.message }); //...returns a 500 (server error) with the error message.
   }
 });
 
-// POST /api/users/login
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
+// Login Route - POST /api/users/login
+router.post('/login', async (req, res) => { // this defines a POST route at /login, making the full path /api/users/login.
+  try {  // try to attempt this code, but if somthing goes technically wrong, jump to 'catch' to throw the proper error and don't crash"
+    const { email, password } = req.body; // this extracts the 'email' and 'password' ONLY out of the 'request body'. 
+                                        // notice the 'username' is not needed here since we're looking up the user by 'email'.
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }); // this searches the database for a user with that email.
     if (!user) {
       return res.status(400).json({ message: 'Incorrect email or password' });
     }

@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({ // creates a new schema/blueprint for t
                           // - 'timestamps:' when set to true, it tells Mongoose to automatically add 2 fields to every document:
                           // -- 'createdAt'
                           // -- 'updatedAt'
-
+/*
 // Pre-save hook to hash password
 userSchema.pre('save', async function(next) { // this registers a pre-save hook, a function that automatically runs before any user document is saved to the database. 
                                                 // 'next' is a callback that you call when function finishes running to continue the save process.
@@ -39,6 +39,23 @@ userSchema.pre('save', async function(next) { // this registers a pre-save hook,
   this.password = await bcrypt.hash(this.password, salt); //  this takes the plain text password, combines it with the salt, and hashes it. Then overwrites this.password with the resulting hash so that's what gets saved.
   next(); // indicates to Mongoose that Tells Mongoose  the pre-save hook process is completed and it's safe to proceed with saving the document.
 });
+*/
+
+
+// Pre-save hook to hash password
+userSchema.pre('save', async function() { // this registers a pre-save hook, a function that automatically runs before any user document is saved to the database. 
+                                          // In newer versions of Mongoose, 'next' is not needed — Mongoose handles continuation automatically with async functions.
+  if (!this.isModified('password')) return; // this checks if the password field was changed. IF it wasn't, THEN it skips the hashing process and moves on. 
+                                            // Therefore, it prevents re-hashing an already hashed password if you update something else on the user object later.
+
+  const salt = await bcrypt.genSalt(10);  // this generates a salt, which is a random string added to the password before hashing to make it more secure. 
+                                          // 10 is the number of rounds, which controls how complex the salt is.
+                                          // the more rounds, the more secure at the expense of speed
+  this.password = await bcrypt.hash(this.password, salt); // this takes the plain text password, combines it with the salt, and hashes it. 
+                                                          // Then overwrites this.password with the resulting hash so that's what gets saved.
+});
+
+
 
 // Instance method to check password
 userSchema.methods.isCorrectPassword = async function(incomingPassword) { //Adds a custom method to every user document.                                                                
